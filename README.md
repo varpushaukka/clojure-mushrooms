@@ -14,5 +14,5 @@ Before you publish your sketch, run `lein do clean, cljsbuild once optimized`. T
 
 ## License
 
-Copyright © 2019
+Copyright © 2019 Henna Kalliokoski
 Distributed under the MIT license.
