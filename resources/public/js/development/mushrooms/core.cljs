@@ -19,15 +19,34 @@
 (defn draw-image [state k [x y]]
   (q/image (get state [:images k]) x y))
 
+(defn wrap [[x y v]]
+  (if (< x (- field-size))
+    [field-size
+     (- (rand-int field-size)
+        (/ field-size 2))
+     v]
+    [x y v]))
+
+(defn move-skull [[x y v]]
+  (wrap [(- x v) y v]))
+
+(defn random-skull []
+  [(rand-int (* 2 field-size))
+   (- (rand-int field-size)
+      (/ field-size 2))])
+
 (defn setup []
   (q/frame-rate 30)
   (q/color-mode :rgb)
   (q/image-mode :center)
-  {:head (load-image "skull-head")
+  {:wild-skulls (take 9 (repeatedly random-skull))
+   :head (load-image "skull-head")
    :jaw (load-image "jaw")})
 
 (defn update-state [state]
-  state)
+  (-> state
+      (update-in [:wild-skulls] #(map move-skull %))
+  ))
 
 (defn skull [x y state]
   (q/rotate (pulse -0.02 0.02 0.5))
@@ -41,15 +60,20 @@
     (q/scale scale)
     (skull x y state)))
 
+(defn draw-skulls [state skulls]
+  (doseq [[x y] skulls]
+    (q/push-matrix)
+    (q/translate x y)
+    (q/scale 0.5)
+    (skull x y state)
+    (q/pop-matrix)))
+
+
 (defn draw-state [state]
   (q/clear)
   (skull (/ (q/width) 2) (/ (q/height) 2) state)
-  (loop [n 5 x 100 y 100 scale 0.5] 
-    (if (zero? n) nil
-        (do 
-          (wild-skull x y state scale)
-          (recur (dec n) (rand-int 1000) (rand-int 1000) (rand))
-          ))))
+  (draw-skulls state (:wild-skulls state))
+  )
   ; (q/with-translation [100 0 0]
   ;   (q/with-rotation [(q/frame-count)]
   ;     (q/image (get state :image) (/ (q/width) 2) (/ (q/height) 2)))
