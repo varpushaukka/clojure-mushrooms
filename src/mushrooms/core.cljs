@@ -29,14 +29,27 @@
 (defn update-state [state]
   state)
 
-(defn draw-state [state]
-  (q/clear)
+(defn skull [x y state]
   (q/rotate (pulse -0.02 0.02 0.5))
   (q/translate (pulse 1 50 0.25) 0)
-  (q/image (get state :head) (/ (q/width) 2) (/ (q/height) 2))
+  (q/image (get state :head) x y)
   (q/translate 0 (pulse 1 100 0.25))
-  (q/image (get state :jaw) (/ (q/width) 2) (/ (q/height) 2))
-  )
+  (q/image (get state :jaw) x y))
+
+(defn wild-skull [x y state scale]
+  (q/with-translation [100 0 0]
+    (q/scale scale)
+    (skull x y state)))
+
+(defn draw-state [state]
+  (q/clear)
+  (skull (/ (q/width) 2) (/ (q/height) 2) state)
+  (loop [n 5 x 100 y 100 scale 0.5] 
+    (if (zero? n) nil
+        (do 
+          (wild-skull x y state scale)
+          (recur (dec n) (rand-int 1000) (rand-int 1000) (rand))
+          ))))
   ; (q/with-translation [100 0 0]
   ;   (q/with-rotation [(q/frame-count)]
   ;     (q/image (get state :image) (/ (q/width) 2) (/ (q/height) 2)))
